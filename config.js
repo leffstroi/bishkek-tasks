@@ -1,0 +1,18 @@
+// === CONFIGURATION ===
+// 1. Create a free project at https://supabase.com
+// 2. Go to Project Settings > API
+// 3. Copy URL and anon public key here
+// 4. Run the SQL from supabase-schema.sql in SQL Editor
+// 5. Create Storage bucket "task-photos" (public)
+// 6. Create Telegram bot via @BotFather and put its username below (without @)
+
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';          // e.g. https://xxxxx.supabase.co
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // starts with eyJ...
+
+// Telegram BOT username (without @) — users will write to the bot 24/7
+// Example: if bot is @BishkekGigsBot then write BishkekGigsBot
+const BOT_TELEGRAM = 'YOUR_BOT_USERNAME';
+
+// Bishkek center coordinates
+const BISHKEK_CENTER = [42.8746, 74.5698];
+const DEFAULT_ZOOM = 12;
