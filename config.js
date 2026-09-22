@@ -6,7 +6,7 @@
 // 5. Create Storage bucket "task-photos" (public)
 // 6. Create Telegram bot via @BotFather and put its username below (without @)
 
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';          // e.g. https://xxxxx.supabase.co
+const SUPABASE_URL = 'https://twtsbcoujalvnbghztyy.supabase.co';          // e.g. https://xxxxx.supabase.co
 const SUPABASE_ANON_KEY = 'sb_publishable_Td6Oo_5YKMIyook2NC_w_Q_1Y5ZYE_c'; // starts with eyJ...
 
 // Telegram BOT username (without @) — users will write to the bot 24/7
