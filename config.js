@@ -11,7 +11,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_Td6Oo_5YKMIyook2NC_w_Q_1Y5ZYE_c'; // s
 
 // Telegram BOT username (without @) — users will write to the bot 24/7
 // Example: if bot is @BishkekGigsBot then write BishkekGigsBot
-const BOT_TELEGRAM = 'YOUR_BOT_USERNAME';
+const BOT_TELEGRAM = 'bishkektasksbot';
 
 // Bishkek center coordinates
 const BISHKEK_CENTER = [42.8746, 74.5698];
