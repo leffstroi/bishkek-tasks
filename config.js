@@ -7,7 +7,7 @@
 // 6. Create Telegram bot via @BotFather and put its username below (without @)
 
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';          // e.g. https://xxxxx.supabase.co
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // starts with eyJ...
+const SUPABASE_ANON_KEY = 'sb_publishable_Td6Oo_5YKMIyook2NC_w_Q_1Y5ZYE_c'; // starts with eyJ...
 
 // Telegram BOT username (without @) — users will write to the bot 24/7
 // Example: if bot is @BishkekGigsBot then write BishkekGigsBot
