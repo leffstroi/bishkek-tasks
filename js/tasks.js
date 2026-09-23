@@ -2,7 +2,7 @@ const Tasks = {
   currentTaskId: null,
 
   async loadOpenTasks() {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('tasks')
       .select('*')
       .eq('status', 'open')
@@ -10,7 +10,8 @@ const Tasks = {
 
     if (error) {
       console.error(error);
-      document.getElementById('tasks-list').innerHTML = '<div class="p-4 text-red-500">Ошибка загрузки заданий</div>';
+      document.getElementById('tasks-list').innerHTML =
+        '<div class="p-4 text-red-500">Ошибка загрузки заданий: ' + (error.message || '') + '</div>';
       return [];
     }
     return data || [];
@@ -20,7 +21,7 @@ const Tasks = {
     const user = await Auth.getUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('tasks')
       .select('*')
       .eq('claimed_by', user.id)
@@ -72,7 +73,7 @@ const Tasks = {
         statusBadge = '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Ожидает оплаты</span>';
         actions = `<p class="mt-2 text-sm text-gray-600">
           Нажмите кнопку ниже и напишите боту адрес получателя + реквизиты для оплаты:<br>
-          <a href="https://t.me/${BOT_TELEGRAM}?start=task_${t.id}" target="_blank" 
+          <a href="https://t.me/${BOT_TELEGRAM}?start=task_${t.id}" target="_blank"
              class="inline-block mt-2 bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600">
             💬 Открыть бота @${BOT_TELEGRAM}
           </a>
@@ -97,7 +98,7 @@ const Tasks = {
   },
 
   async showDetail(taskId) {
-    const { data: task, error } = await supabase
+    const { data: task, error } = await supabaseClient
       .from('tasks')
       .select('*')
       .eq('id', taskId)
@@ -139,7 +140,7 @@ const Tasks = {
     } else if (task.status === 'completed' && user && task.claimed_by === user.id) {
       actionsHtml = `
         <p class="text-sm mb-2">Напишите боту адрес получателя и реквизиты для оплаты:</p>
-        <a href="https://t.me/${BOT_TELEGRAM}?start=task_${task.id}" target="_blank" 
+        <a href="https://t.me/${BOT_TELEGRAM}?start=task_${task.id}" target="_blank"
            class="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600">
           💬 Открыть бота @${BOT_TELEGRAM}
         </a>`;
@@ -156,7 +157,7 @@ const Tasks = {
       return;
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('tasks')
       .update({
         status: 'claimed',
@@ -196,7 +197,7 @@ const Tasks = {
     const user = await Auth.getUser();
     const fileName = `${user.id}/${this.currentTaskId}_${Date.now()}.jpg`;
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabaseClient.storage
       .from('task-photos')
       .upload(fileName, file, { upsert: true });
 
@@ -205,11 +206,11 @@ const Tasks = {
       return;
     }
 
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = supabaseClient.storage
       .from('task-photos')
       .getPublicUrl(fileName);
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseClient
       .from('tasks')
       .update({
         status: 'completed',
@@ -232,13 +233,19 @@ const Tasks = {
   },
 
   async refresh() {
-    const openTasks = await this.loadOpenTasks();
-    this.renderList(openTasks);
+    try {
+      const openTasks = await this.loadOpenTasks();
+      this.renderList(openTasks);
 
-    MapApp.clearMarkers();
-    openTasks.forEach(t => MapApp.addTaskMarker(t));
+      MapApp.clearMarkers();
+      openTasks.forEach(t => MapApp.addTaskMarker(t));
 
-    const myTasks = await this.loadMyTasks();
-    this.renderMyTasks(myTasks);
+      const myTasks = await this.loadMyTasks();
+      this.renderMyTasks(myTasks);
+    } catch (e) {
+      console.error(e);
+      const el = document.getElementById('tasks-list');
+      if (el) el.innerHTML = '<div class="p-4 text-red-500">Ошибка: ' + e.message + '</div>';
+    }
   }
 };
