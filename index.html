@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bishkek Tasks — Заработай в городе</title>
+  <title>Bishkek Gigs — Заработай в Бишкеке</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -11,27 +11,23 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
-  <!-- Navbar -->
   <nav class="bg-blue-600 text-white shadow-lg">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
       <a href="index.html" class="text-xl font-bold flex items-center gap-2">
-        🛵 Bishkek Tasks
+        🛵 Bishkek Gigs
       </a>
-      <div id="nav-auth" class="flex items-center gap-4">
-        <!-- Filled by JS -->
-      </div>
+      <div id="nav-auth" class="flex items-center gap-4"></div>
     </div>
   </nav>
 
   <main class="max-w-7xl mx-auto px-4 py-6">
-    <!-- Hero / Intro -->
     <div class="mb-6 bg-white rounded-xl shadow p-6">
-      <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Зарабатывай выполняя задания в внутри города</h1>
-      <p class="text-gray-600">Бери заказы на доставку, перевозку вещей и другие задания. Получай оплату после выполнения.</p>
+      <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Задания внутри города</h1>
+      <p class="text-gray-600 mb-4">Любой может опубликовать работу. Любой может её взять. Оплату делает заказчик напрямую исполнителю.</p>
+      <a href="create.html" class="inline-block bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700">Создать задание</a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Map -->
       <div class="lg:col-span-2 bg-white rounded-xl shadow overflow-hidden">
         <div class="p-4 border-b flex justify-between items-center">
           <h2 class="font-semibold text-lg">Карта заданий</h2>
@@ -40,29 +36,23 @@
         <div id="map" class="h-96 md:h-[500px]"></div>
       </div>
 
-      <!-- Tasks list -->
       <div class="bg-white rounded-xl shadow">
         <div class="p-4 border-b">
           <h2 class="font-semibold text-lg">Открытые задания</h2>
           <p class="text-sm text-gray-500">Нажми чтобы увидеть детали</p>
         </div>
         <div id="tasks-list" class="divide-y max-h-[500px] overflow-y-auto">
-          <!-- Tasks loaded by JS -->
           <div class="p-4 text-center text-gray-400">Загрузка...</div>
         </div>
       </div>
     </div>
 
-    <!-- My Tasks section (if logged in) -->
     <div id="my-tasks-section" class="mt-8 hidden">
       <h2 class="text-xl font-bold mb-4">Мои задания</h2>
-      <div id="my-tasks-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Filled by JS -->
-      </div>
+      <div id="my-tasks-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </div>
   </main>
 
-  <!-- Task Detail Modal -->
   <div id="task-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
       <div class="p-6">
@@ -70,17 +60,12 @@
           <h3 id="modal-title" class="text-xl font-bold"></h3>
           <button id="modal-close" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
         </div>
-        <div id="modal-body" class="space-y-3 text-gray-700">
-          <!-- Content -->
-        </div>
-        <div id="modal-actions" class="mt-6 flex flex-wrap gap-3">
-          <!-- Buttons -->
-        </div>
+        <div id="modal-body" class="space-y-3 text-gray-700"></div>
+        <div id="modal-actions" class="mt-6 flex flex-wrap gap-3"></div>
       </div>
     </div>
   </div>
 
-  <!-- Upload Photo Modal -->
   <div id="upload-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl max-w-md w-full p-6">
       <h3 class="text-lg font-bold mb-4">Загрузить фото выполнения</h3>
@@ -95,7 +80,7 @@
 
   <footer class="bg-gray-800 text-gray-300 text-center py-6 mt-12">
     <p>Bishkek Gigs &copy; 2026 — Платформа для подработки в Бишкеке</p>
-    <p class="text-sm mt-1">После выполнения задания вы получите Telegram админа для оплаты</p>
+    <p class="text-sm mt-1">Заказчик и исполнитель договариваются об оплате напрямую</p>
   </footer>
 
   <script src="js/config.js"></script>
