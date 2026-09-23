@@ -63,7 +63,8 @@ const Auth = {
     if (session) {
       const profile = await this.getProfile();
       const name = profile?.username || profile?.full_name || session.user.email;
-      let html = `<span class="text-sm hidden sm:inline">Привет, ${name}</span>`;
+      let html = `<a href="create.html" class="bg-white text-blue-600 px-3 py-1 rounded font-medium text-sm">+ Задание</a>`;
+      html += `<span class="text-sm hidden sm:inline">Привет, ${name}</span>`;
       if (profile?.role === 'admin') {
         html += `<a href="admin.html" class="bg-white/20 px-3 py-1 rounded hover:bg-white/30 text-sm">Админ</a>`;
       }
@@ -82,7 +83,6 @@ const Auth = {
   }
 };
 
-// Auto update nav on pages that have it
 document.addEventListener('DOMContentLoaded', () => {
   Auth.updateNav();
 });
