@@ -10,8 +10,7 @@ const Tasks = {
 
     if (error) {
       console.error(error);
-      document.getElementById('tasks-list').innerHTML =
-        '<div class="p-4 text-red-500">Ошибка загрузки заданий: ' + (error.message || '') + '</div>';
+      document.getElementById('tasks-list').innerHTML = '<div class="p-4 text-red-500">Ошибка загрузки заданий</div>';
       return [];
     }
     return data || [];
@@ -24,8 +23,8 @@ const Tasks = {
     const { data, error } = await supabaseClient
       .from('tasks')
       .select('*')
-      .eq('claimed_by', user.id)
-      .order('claimed_at', { ascending: false });
+      .or(`claimed_by.eq.${user.id},created_by.eq.${user.id}`)
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error(error);
@@ -62,24 +61,28 @@ const Tasks = {
       return;
     }
     section.classList.remove('hidden');
+    const userId = window.__currentUserId || null;
 
     list.innerHTML = tasks.map(t => {
+      const isOwner = userId && t.created_by === userId;
+      const isWorker = userId && t.claimed_by === userId;
       let statusBadge = '';
       let actions = '';
-      if (t.status === 'claimed') {
+      if (t.status === 'claimed' && isWorker) {
         statusBadge = '<span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">В работе</span>';
         actions = `<button onclick="Tasks.openUpload('${t.id}')" class="mt-2 bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700">Загрузить фото</button>`;
-      } else if (t.status === 'completed') {
-        statusBadge = '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Ожидает оплаты</span>';
-        actions = `<p class="mt-2 text-sm text-gray-600">
-          Нажмите кнопку ниже и напишите боту адрес получателя + реквизиты для оплаты:<br>
-          <a href="https://t.me/${BOT_TELEGRAM}?start=task_${t.id}" target="_blank"
-             class="inline-block mt-2 bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600">
-            💬 Открыть бота @${BOT_TELEGRAM}
-          </a>
-        </p>`;
+      } else if (t.status === 'claimed' && isOwner) {
+        statusBadge = '<span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Исполнитель работает</span>';
+      } else if (t.status === 'completed' && isWorker) {
+        statusBadge = '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Ждёт оплаты</span>';
+        actions = `<p class="mt-2 text-sm text-gray-600">Напиши заказчику реквизиты в Telegram.</p>`;
+      } else if (t.status === 'completed' && isOwner) {
+        statusBadge = '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Нужно оплатить</span>';
+        actions = `<button onclick="Tasks.markPaid('${t.id}')" class="mt-2 bg-green-600 text-white text-sm px-3 py-1 rounded hover:bg-green-700">Я оплатил</button>`;
       } else if (t.status === 'paid') {
         statusBadge = '<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Оплачено</span>';
+      } else if (t.status === 'open' && isOwner) {
+        statusBadge = '<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Моё объявление</span>';
       }
 
       return `
@@ -131,19 +134,27 @@ const Tasks = {
     const user = await Auth.getUser();
     let actionsHtml = '';
 
-    if (task.status === 'open' && user) {
+    if (task.status === 'open' && user && task.created_by === user.id) {
+      actionsHtml = `<p class="text-sm text-gray-500">Это твоё объявление.</p>`;
+    } else if (task.status === 'open' && user) {
       actionsHtml = `<button onclick="Tasks.claimTask('${task.id}')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Взять задание</button>`;
     } else if (task.status === 'open' && !user) {
       actionsHtml = `<a href="login.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Войдите чтобы взять</a>`;
     } else if (task.status === 'claimed' && user && task.claimed_by === user.id) {
       actionsHtml = `<button onclick="Tasks.openUpload('${task.id}')" class="bg-green-600 text-white px-4 py-2 rounded-lg">Загрузить фото выполнения</button>`;
     } else if (task.status === 'completed' && user && task.claimed_by === user.id) {
+      const { data: owner } = await supabaseClient.from('profiles').select('telegram_username').eq('id', task.created_by).single();
+      const tg = owner?.telegram_username ? owner.telegram_username.replace(/^@/, '') : '';
+      actionsHtml = tg
+        ? `<a href="https://t.me/${tg}" target="_blank" class="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg">Написать заказчику @${tg}</a>`
+        : `<p class="text-sm">Telegram заказчика пока не указан</p>`;
+    } else if (task.status === 'completed' && user && task.created_by === user.id) {
+      const { data: worker } = await supabaseClient.from('profiles').select('telegram_username').eq('id', task.claimed_by).single();
+      const tg = worker?.telegram_username ? worker.telegram_username.replace(/^@/, '') : '';
       actionsHtml = `
-        <p class="text-sm mb-2">Напишите боту адрес получателя и реквизиты для оплаты:</p>
-        <a href="https://t.me/${BOT_TELEGRAM}?start=task_${task.id}" target="_blank"
-           class="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600">
-          💬 Открыть бота @${BOT_TELEGRAM}
-        </a>`;
+        ${tg ? `<a href="https://t.me/${tg}" target="_blank" class="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg">Написать исполнителю @${tg}</a>` : ''}
+        <button onclick="Tasks.markPaid('${task.id}')" class="bg-green-600 text-white px-4 py-2 rounded-lg">Я оплатил</button>
+      `;
     }
 
     actions.innerHTML = actionsHtml;
@@ -225,20 +236,38 @@ const Tasks = {
       return;
     }
 
-    statusEl.textContent = 'Готово! Теперь нажмите кнопку «Открыть бота» и отправьте данные.';
+    statusEl.textContent = 'Готово! Напиши заказчику в Telegram реквизиты для оплаты.';
     setTimeout(() => {
       document.getElementById('upload-modal').classList.add('hidden');
       this.refresh();
     }, 1500);
   },
 
+  async markPaid(taskId) {
+    if (!confirm('Подтвердить, что ты уже оплатил исполнителю?')) return;
+    const { error } = await supabaseClient
+      .from('tasks')
+      .update({ status: 'paid' })
+      .eq('id', taskId);
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    this.refresh();
+  },
+
   async refresh() {
     try {
+      const user = await Auth.getUser();
+      window.__currentUserId = user ? user.id : null;
+
       const openTasks = await this.loadOpenTasks();
       this.renderList(openTasks);
 
-      MapApp.clearMarkers();
-      openTasks.forEach(t => MapApp.addTaskMarker(t));
+      if (typeof MapApp !== 'undefined') {
+        MapApp.clearMarkers();
+        openTasks.forEach(t => MapApp.addTaskMarker(t));
+      }
 
       const myTasks = await this.loadMyTasks();
       this.renderMyTasks(myTasks);
